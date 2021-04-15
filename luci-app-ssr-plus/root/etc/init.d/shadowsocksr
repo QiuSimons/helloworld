@@ -339,8 +339,8 @@ start_udp() {
 	ss | ssr)
 		gen_config_file $UDP_RELAY_SERVER $type 2 $tmp_udp_port
 		ss_program="$(first_type ${type}local ${type}-redir)"
-		[ "$(printf '%s' "$ss_program" | awk -F '/' '{print $NF}')" = "${type}local" ] && local ss_extra_arg="--protocol redir"
-		ln_start_bin $ss_program ${type}-redir -c $udp_config_file $ss_extra_arg
+		[ "$(printf '%s' "$ss_program" | awk -F '/' '{print $NF}')" = "${type}local" ] && local ss_extra_arg="--protocol redir" && local new_udp_port=$(($tmp_udp_port+$tmp_udp_port)) && local ssrust_arg="--local-addr 0.0.0.0:${tmp_udp_port}" && sed -i "s/${tmp_udp_port}/${new_udp_port}/g" $udp_config_file
+		ln_start_bin $ss_program ${type}-redir -c $udp_config_file $ss_extra_arg $ssrust_arg
 		echolog "UDP TPROXY Relay:$(get_name $type) Started!"
 		;;
 	v2ray)
@@ -382,8 +382,8 @@ start_shunt() {
 	ss | ssr)
 		gen_config_file $SHUNT_SERVER $type 3 $tmp_shunt_port
 		ss_program="$(first_type ${type}local ${type}-redir)"
-		[ "$(printf '%s' "$ss_program" | awk -F '/' '{print $NF}')" = "${type}local" ] && local ss_extra_arg="--protocol redir"
-		ln_start_bin $ss_program ${type}-redir -c $shunt_config_file $ss_extra_arg
+		[ "$(printf '%s' "$ss_program" | awk -F '/' '{print $NF}')" = "${type}local" ] && local ss_extra_arg="--protocol redir" && local new_shunt_port=$(($tmp_shunt_port+$tmp_shunt_port)) && local ssrust_arg="--local-addr 0.0.0.0:${tmp_shunt_port}" && sed -i "s/${tmp_shunt_port}/${new_shunt_port}/g" $shunt_config_file
+		ln_start_bin $ss_program ${type}-redir -c $shunt_config_file $ss_extra_arg $ssrust_arg
 		if [ -n "$tmp_local_port" ]; then
 			local tmp_port=$tmp_local_port
 		else
@@ -530,9 +530,9 @@ Start_Run() {
 	ss | ssr)
 		gen_config_file $GLOBAL_SERVER $type 1 $tcp_port
 		ss_program="$(first_type ${type}local ${type}-redir)"
-		[ "$(printf '%s' "$ss_program" | awk -F '/' '{print $NF}')" = "${type}local" ] && local ss_extra_arg="--protocol redir"
+		[ "$(printf '%s' "$ss_program" | awk -F '/' '{print $NF}')" = "${type}local" ] && local ss_extra_arg="--protocol redir" && local new_tcp_port=$(($tcp_port+$tcp_port)) && local ssrust_arg="--local-addr 0.0.0.0:${tcp_port}" && sed -i "s/${tcp_port}/${new_tcp_port}/g" $tcp_config_file
 		for i in $(seq 1 $threads); do
-			ln_start_bin "$ss_program" ${type}-redir -c $tcp_config_file $ss_extra_arg
+			ln_start_bin "$ss_program" ${type}-redir -c $tcp_config_file $ss_extra_arg $ssrust_arg
 		done
 		echolog "Main node:$(get_name $type) $threads Threads Started!"
 		;;
